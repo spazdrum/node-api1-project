@@ -1,77 +1,82 @@
 const express = require("express");
 const shortid = "shortid";
+
+const PORT = 5000;
+
 const server = express();
-server.use(express.json);
+server.use(express.json());
 
-let users = [];
-
-// GET / Handler
+let users = [
+  {
+    id: shortid.generate(),
+    name: "Jane Doe",
+    bio: "Not Tarzans wife, different Jane",
+  },
+  {
+    id: shortid.generate(),
+    name: "John Doe",
+    bio: "The guy that no one really knows",
+  },
+];
 
 server.get("/", (req, res) => {
-  res.json({ message: "Hello User!" });
+  res.send("Hello user!");
 });
 
-//-------------------------//
-//  POST - Crud - Create
-//-------------------------//
+server.listen(PORT, () => {
+  console.log(`listening on port ${PORT}`);
+});
 
 server.post("/api/users", (req, res) => {
   const userInfo = req.body;
-  //body validation
-  function validateBody(body) {
-    //body validation
-    return true;
-  }
-
-  if (validateBody(body)) {
+  if (userInfo) {
     userInfo.id = shortid.generate();
     users.push(userInfo);
     res.status(201).json(userInfo);
   } else {
     res
       .status(400)
-      .json({ errorMessage: "Please provide name and bio for the user." });
+      .json({ message: "The object requested is not valid, please RTFM" });
   }
 });
 
-//-------------------------//
-//    GET - cRud - Read
-//-------------------------//
-
 server.get("api/users", (req, res) => {
-  const users = [
-    {
-      id: { shortid },
-      name: "Jane Doe",
-      bio: "Not Tarzans wife, another Jane",
-    },
-    {
-      id: { shortid },
-      name: "John Doe",
-      bio: "I'm the one that everyone remembers but never sees",
-    },
-  ];
-
-  res.status(200).json(users);
+  res.send(users);
 });
 
-//--------------------------//
-//  DELETE - cruD - Delete
-//--------------------------//
+server.get("/api/users/:id", (req, res) => {
+  const { id } = req.params;
+  const userById = users.filter((user) => user.id === id);
+
+  if (userById[0]) {
+    res.send(userById);
+  } else {
+    res.status(404).json({ message: "User not found, try a different id" });
+  }
+});
 
 server.delete("/api/users/:id", (req, res) => {
   const { id } = req.params;
-  const found = users.find((users) => users.id === id);
+  const found = users.find((user) => user.id !== id);
+
   if (found) {
-    users = users.filter((users) => users.id !== id);
-    res.status(200).json(found);
+    users = users.filter((user) => user.id !== id);
   } else {
     res.status(404).json({ message: "user not found" });
   }
 });
 
-const PORT = 5000;
+server.put("api/users/:id", (req, res) => {
+  const { id } = req.params;
+  const changes = req.body;
 
-server.listen(PORT, () => {
-  console.log(`listening on http://localhost:${PORT}`);
+  let index = users.findIndex((user) => user.id === id);
+
+  if (index !== -1) {
+    changes.id = id;
+    users[index] = changes;
+    res.status(200).json(users[index]);
+  } else {
+    res.status(404).json({ message: "user not found" });
+  }
 });
