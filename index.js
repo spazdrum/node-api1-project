@@ -1,5 +1,5 @@
 const express = require("express");
-const shortid = "shortid";
+const shortid = require("shortid");
 
 const PORT = 5000;
 
