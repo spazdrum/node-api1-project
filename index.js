@@ -40,8 +40,8 @@ server.post("/api/users", (req, res) => {
   }
 });
 
-server.get("api/users", (req, res) => {
-  res.send(users);
+server.get("/api/users", (req, res) => {
+  res.status(200).json(users);
 });
 
 server.get("/api/users/:id", (req, res) => {
@@ -61,12 +61,13 @@ server.delete("/api/users/:id", (req, res) => {
 
   if (found) {
     users = users.filter((user) => user.id !== id);
+    res.status(200).json({ message: "deleted user" });
   } else {
     res.status(404).json({ message: "user not found" });
   }
 });
 
-server.put("api/users/:id", (req, res) => {
+server.put("/api/users/:id", (req, res) => {
   const { id } = req.params;
   const changes = req.body;
 
